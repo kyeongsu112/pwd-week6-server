@@ -10,8 +10,11 @@ class AuthController {
   register = asyncHandler(async (req, res) => {
     const { email, password, name } = req.body;
 
+    console.log('회원가입 요청:', { email, password, name });
+
     // 유효성 검사
     if (!email || !password || !name) {
+      console.log('회원가입 유효성 검사 실패: 이메일, 비밀번호, 이름 필수');
       return res.status(400).json({
         success: false,
         message: '이메일, 비밀번호, 이름은 필수입니다.',
@@ -19,23 +22,27 @@ class AuthController {
     }
 
     if (password.length < 6) {
+      console.log('비밀번호 길이 부족');
       return res.status(400).json({
         success: false,
         message: '비밀번호는 최소 6자 이상이어야 합니다.',
       });
     }
 
+    console.log('회원가입 요청 처리 중...');
     const user = await authService.register({ email, password, name });
 
     // 회원가입 후 자동 로그인
     req.login(user, (err) => {
       if (err) {
+        console.log('회원가입 후 로그인 중 오류 발생');
         return res.status(500).json({
           success: false,
           message: '회원가입 후 로그인 중 오류가 발생했습니다.',
         });
       }
 
+      console.log('회원가입 완료', user);
       res.status(201).json({
         success: true,
         message: '회원가입이 완료되었습니다.',
@@ -191,7 +198,6 @@ class AuthController {
       });
     })(req, res, next);
   };
-
 }
 
 module.exports = new AuthController();

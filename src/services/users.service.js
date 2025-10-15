@@ -1,4 +1,4 @@
-// src/services/users.service.js
+const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 
 class UsersService {
@@ -59,7 +59,8 @@ class UsersService {
     }
 
     // 새 비밀번호 설정
-    user.password = newPassword;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
     await user.save();
 
     return user;
@@ -109,6 +110,27 @@ class UsersService {
     user.userType = newUserType;
     await user.save();
 
+    return user;
+  }
+
+  /**
+   * 회원가입
+   */
+  async register({ email, password, name }) {
+    console.log('register() 호출됨', { email, password, name });
+
+    // 비밀번호 해싱
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      email,
+      password: hashedPassword,  // 해싱된 비밀번호 저장
+      name,
+    });
+
+    await user.save(); // DB에 저장
+
+    console.log('회원가입 완료', user);
     return user;
   }
 }
