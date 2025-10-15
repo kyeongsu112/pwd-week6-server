@@ -7,6 +7,7 @@ const getCorsConfig = () => {
     'http://localhost:5173',    // 로컬 Vite 개발 서버
     'http://localhost:3000',    // 로컬 React 개발 서버 (백업)
     'http://127.0.0.1:5173',    // 로컬 Vite (IP 주소)
+    'https://pwd-week6-client-h8r4.vercel.app'
   ];
 
   // 환경변수에서 추가 URL들 가져오기
