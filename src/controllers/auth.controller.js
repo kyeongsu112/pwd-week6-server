@@ -1,4 +1,3 @@
-// src/controllers/auth.controller.js
 const passport = require('passport');
 const authService = require('../services/users.service');
 const asyncHandler = require('../utils/asyncHandler');
@@ -52,6 +51,7 @@ class AuthController {
   login = (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
       if (err) {
+        console.error('[Login Error]', err);
         return res.status(500).json({
           success: false,
           message: '로그인 중 오류가 발생했습니다.',
@@ -59,6 +59,7 @@ class AuthController {
       }
 
       if (!user) {
+        console.warn('[Login Failed] No user:', info);
         return res.status(401).json({
           success: false,
           message: info.message || '로그인에 실패했습니다.',
@@ -67,6 +68,7 @@ class AuthController {
 
       req.login(user, (err) => {
         if (err) {
+          console.error('[Login Error] Failed to log in:', err);
           return res.status(500).json({
             success: false,
             message: '로그인 중 오류가 발생했습니다.',
@@ -138,24 +140,25 @@ class AuthController {
    */
   googleCallback = (req, res, next) => {
     passport.authenticate('google', (err, user, info) => {
+      const base = process.env.CLIENT_URL || 'http://localhost:3000';  // 기본값을 로컬로 설정
       if (err) {
-        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=server_error`);
+        console.error('[Google Callback] Authentication error:', err);
+        return res.redirect(`${base}/login?error=server_error`);
       }
 
       if (!user) {
-        return res.redirect(
-          `${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=${encodeURIComponent(
-            info.message || '로그인 실패'
-          )}`
-        );
+        console.error('[Google Callback] No user found:', info);
+        return res.redirect(`${base}/login?error=${encodeURIComponent(info.message || '로그인 실패')}`);
       }
 
       req.login(user, (err) => {
         if (err) {
-          return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=login_error`);
+          console.error('[Google Callback] Login error:', err);
+          return res.redirect(`${base}/login?error=login_error`);
         }
 
-        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/dashboard`);
+        console.log('[Google Callback] Successfully logged in user:', user._id);
+        return res.redirect(`${base}/dashboard`);
       });
     })(req, res, next);
   };
@@ -166,32 +169,25 @@ class AuthController {
    */
   naverCallback = (req, res, next) => {
     passport.authenticate('naver', (err, user, info) => {
-      console.log('[Naver Callback] Error:', err);
-      console.log('[Naver Callback] User:', user);
-      console.log('[Naver Callback] Info:', info);
-      
+      const base = process.env.CLIENT_URL || 'http://localhost:3000';  // 기본값을 로컬로 설정
       if (err) {
         console.error('[Naver Callback] Authentication error:', err);
-        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=server_error`);
+        return res.redirect(`${base}/login?error=server_error`);
       }
 
       if (!user) {
         console.error('[Naver Callback] No user found:', info);
-        return res.redirect(
-          `${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=${encodeURIComponent(
-            info.message || '로그인 실패'
-          )}`
-        );
+        return res.redirect(`${base}/login?error=${encodeURIComponent(info.message || '로그인 실패')}`);
       }
 
       req.login(user, (err) => {
         if (err) {
           console.error('[Naver Callback] Login error:', err);
-          return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=login_error`);
+          return res.redirect(`${base}/login?error=login_error`);
         }
 
         console.log('[Naver Callback] Successfully logged in user:', user._id);
-        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/dashboard`);
+        return res.redirect(`${base}/dashboard`);
       });
     })(req, res, next);
   };
