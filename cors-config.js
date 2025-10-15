@@ -11,9 +11,8 @@ const getCorsConfig = () => {
 
   // 환경변수에서 추가 URL들 가져오기
   if (process.env.CLIENT_URL) {
-    process.env.CLIENT_URL.split(',').forEach(url => {
-      allowedOrigins.add(url.trim().replace(/\/$/, '')); // ✅ 끝 슬래시 제거
-    });
+    const clientUrls = process.env.CLIENT_URL.split(',');
+    allowedOrigins.push(...clientUrls);
   }
 
   // 프로덕션 환경에서 배포 클라이언트 허용
